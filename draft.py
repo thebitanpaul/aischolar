@@ -1,3 +1,7 @@
+import sys
+custom_dir = r'/Users/thebitanpaul/Library/CloudStorage/GoogleDrive-thebitanpaul@gmail.com/My Drive/Classroom/Common Batch(2024)/Bitan Paul/Projects/VestorDbTest/aiScholar/lib/python3.9/site-packages'
+sys.path.append(custom_dir)
+
 import os
 import streamlit as st
 from PyPDF2 import PdfReader
@@ -10,21 +14,13 @@ from langchain_community.chat_models import ChatOpenAI
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
-
 # Function to read PDF content
-def read_pdf(file_path):
-    pdf_reader = PdfReader(file_path)
+def read_pdf(file):
+    pdf_reader = PdfReader(file)
     text = ""
     for page in pdf_reader.pages:
         text += page.extract_text()
     return text
-
-
-# Mapping of PDFs
-pdf_mapping = {
-    'American Economy': 'AmericanEconomyWithCovers.pdf',
-    'Indian Economy' : 'TheIndianEconomy.pdf'    
-}
 
 # Load environment variables
 load_dotenv()
@@ -36,29 +32,15 @@ def main():
         st.title('🤗💬 PDF Chat App')
         st.markdown('''
         ## About
-        Choose the desired PDF, then perform a query.
+        Choose the desired PDF or upload your own, then perform a query.
         ''')
 
+        # File uploader for uploading PDFs
+        uploaded_file = st.file_uploader("Upload PDF", type=["pdf"])
 
-    custom_names = list(pdf_mapping.keys())
-
-    selected_custom_name = st.sidebar.selectbox('Choose your PDF', ['', *custom_names])
-
-    selected_actual_name = pdf_mapping.get(selected_custom_name)
-
-    if selected_actual_name:
-        pdf_folder = "pdfs"
-        file_path = os.path.join(pdf_folder, selected_actual_name)
-
-        try:
-            text = read_pdf(file_path)
-            st.info("The content of the PDF is hidden. Type your query in the chat window.")
-        except FileNotFoundError:
-            st.error(f"File not found: {file_path}")
-            return
-        except Exception as e:
-            st.error(f"Error occurred while reading the PDF: {e}")
-            return
+    if uploaded_file:
+        text = read_pdf(uploaded_file)
+        st.info("The content of the PDF is hidden. Type your query in the chat window.")
 
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
@@ -83,7 +65,7 @@ def main():
         if not os.path.exists(pickle_folder):
             os.mkdir(pickle_folder)
 
-        pickle_file_path = os.path.join(pickle_folder, f"{selected_custom_name}.pkl")
+        pickle_file_path = os.path.join(pickle_folder, f"{uploaded_file.name}.pkl")
 
         if not os.path.exists(pickle_file_path):
             with open(pickle_file_path, "wb") as f:
@@ -101,7 +83,7 @@ def main():
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
 
-        if prompt := st.chat_input("Ask your questions from PDF "f'{selected_custom_name}'"?"):
+        if prompt := st.chat_input(f"Ask your questions from PDF {uploaded_file.name}?"):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.markdown(prompt)
