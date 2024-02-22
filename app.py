@@ -1,3 +1,7 @@
+import sys
+custom_dir = r'/Users/thebitanpaul/Library/CloudStorage/GoogleDrive-thebitanpaul@gmail.com/My Drive/Classroom/Common Batch(2024)/Bitan Paul/Projects/VestorDbTest/aiScholar/lib/python3.9/site-packages'
+sys.path.append(custom_dir)
+
 import os
 import streamlit as st
 from PyPDF2 import PdfReader
