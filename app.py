@@ -29,7 +29,7 @@ load_dotenv()
 def main():
     st.title("Query your PDF")
     with st.sidebar:
-        st.title('🤗💬 PDF Chat App')
+        st.title('Ai Scholar')
         st.markdown('''
         ## About
         Choose the desired PDF or upload your own, then perform a query.
