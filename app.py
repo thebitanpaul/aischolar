@@ -1,7 +1,4 @@
 import sys
-custom_dir = r'/Users/thebitanpaul/Library/CloudStorage/GoogleDrive-thebitanpaul@gmail.com/My Drive/Classroom/Common Batch(2024)/Bitan Paul/Projects/VestorDbTest/aiScholar/lib/python3.9/site-packages'
-sys.path.append(custom_dir)
-
 import os
 import streamlit as st
 from PyPDF2 import PdfReader
@@ -11,7 +8,6 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 import pickle
 from langchain.chains import ConversationalRetrievalChain
 from langchain_community.chat_models import ChatOpenAI
-from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
 # Function to read PDF content
@@ -27,7 +23,7 @@ load_dotenv()
 
 # Main Streamlit app
 def main():
-    st.title("Query your PDF")
+    st.title("Query your PDF here")
     with st.sidebar:
         st.title('Ai Scholar')
         st.markdown('''
@@ -55,21 +51,14 @@ def main():
         embeddings = OpenAIEmbeddings()
         vectorstore = FAISS.from_texts(documents, embedding=embeddings)
 
-        st.session_state.processed_data = {
-            "document_chunks": documents,
-            "vectorstore": vectorstore,
-        }
-
         # Save vectorstore using pickle
-        pickle_folder = "Pickle"
-        if not os.path.exists(pickle_folder):
-            os.mkdir(pickle_folder)
+        pickle_data = pickle.dumps(vectorstore)
 
-        pickle_file_path = os.path.join(pickle_folder, f"{uploaded_file.name}.pkl")
-
-        if not os.path.exists(pickle_file_path):
-            with open(pickle_file_path, "wb") as f:
-                pickle.dump(vectorstore, f)
+        # Store pickle data in a SessionState variable
+        if "pickle_data" not in st.session_state:
+            st.session_state.pickle_data = pickle_data
+        else:
+            st.session_state.pickle_data = pickle_data
 
         # Load the Langchain chatbot
         llm = ChatOpenAI(temperature=0, max_tokens=1000, model_name="gpt-3.5-turbo")
@@ -89,14 +78,12 @@ def main():
                 st.markdown(prompt)
 
             result = qa({"question": prompt, "chat_history": [(message["role"], message["content"]) for message in st.session_state.messages]})
-            print(prompt)
 
             with st.chat_message("assistant"):
                 message_placeholder = st.empty()
                 full_response = result["answer"]
                 message_placeholder.markdown(full_response + "|")
             message_placeholder.markdown(full_response)
-            print(full_response)
             st.session_state.messages.append({"role": "assistant", "content": full_response})
 
 if __name__ == "__main__":
