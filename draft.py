@@ -52,12 +52,21 @@ def main():
         embeddings = OpenAIEmbeddings()
         vectorstore = FAISS.from_texts(documents, embedding=embeddings)
 
-
         st.session_state.processed_data = {
             "document_chunks": documents,
             "vectorstore": vectorstore,
         }
 
+        # Save vectorstore using pickle in temporary directory
+        pickle_folder = "temp_pickle"
+        if not os.path.exists(pickle_folder):
+            os.mkdir(pickle_folder)
+
+        pickle_file_path = os.path.join(pickle_folder, f"{uploaded_file.name}.pkl")
+
+        if not os.path.exists(pickle_file_path):
+            with open(pickle_file_path, "wb") as f:
+                pickle.dump(vectorstore, f)
 
         # Load the Langchain chatbot
         llm = ChatOpenAI(temperature=0, max_tokens=1000, model_name="gpt-3.5-turbo")
