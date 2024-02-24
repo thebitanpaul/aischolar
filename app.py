@@ -46,7 +46,7 @@ def main():
 
     if uploaded_file is None:
         st.info("Please upload a file of type: " + ", ".join(["pdf", "html"]) + " to start analysing your data.")
-        st.image("/Users/thebitanpaul/Library/CloudStorage/GoogleDrive-thebitanpaul@gmail.com/My Drive/Classroom/Common Batch(2024)/Bitan Paul/Projects/VestorDbTest/aiScholar/waitingForScholar.webp", use_column_width=True)
+        st.image("waitingForScholar.webp", use_column_width=True)
         return
 
     if uploaded_file:
